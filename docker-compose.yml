@@ -1,0 +1,73 @@
+version: '3'
+
+networks:
+  laravel:
+
+services:
+  site:
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    container_name: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - php
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    container_name: php
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - laravel
+
+
+  composer:
+    build:
+      context: .
+      dockerfile: composer.dockerfile
+    container_name: composer
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    user: laravel
+    entrypoint: ['composer', '--ignore-platform-reqs']
+    networks:
+      - laravel
+
+  npm:
+    image: node:13.7
+    container_name: npm
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - 3000:3000
+      - 3001:3001
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+    networks:
+      - laravel
+
+  artisan:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    container_name: artisan
+    volumes:
+      - ./src:/var/www/html:delegated
+    depends_on:
+      - php
+    working_dir: /var/www/html
+    user: laravel
+    entrypoint: ['php', '/var/www/html/artisan']
+    networks:
+      - laravel

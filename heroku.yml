@@ -1,0 +1,10 @@
+build:
+  docker:
+    nginx: nginx.dockerfile
+    build: php.dockerfile
+    composer: composer.dockerfile
+    site: Dockerfile
+
+
+run:
+  site: php artisan serve --host=0.0.0.0 --port=$PORT
